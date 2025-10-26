@@ -1,0 +1,30 @@
+timeframes: ["15m", "30m", "1h", "4h"]
+default_timeframe: "15m"
+websockets: true
+exchange: "binanceusdm"
+symbols:
+  - BTCUSDT
+  - ETHUSDT
+  - BNBUSDT
+  - SOLUSDT
+  - XRPUSDT
+  - DOGEUSDT
+  - ADAUSDT
+  - LINKUSDT
+  - DOTUSDT
+  - MATICUSDT
+  - LTCUSDT
+  - TRXUSDT
+  - ATOMUSDT
+  - AVAXUSDT
+  - NEARUSDT
+  - FILUSDT
+  - APTUSDT
+  - SUIUSDT
+  - PAXGUSDT
+  - BCHUSDT
+lookback_candles: 300
+poll_seconds: 30
+batch_duration_days: 7
+parallel_strategies: 10
+random_seed: 42
