@@ -1,7 +1,12 @@
 from fastapi import FastAPI
+from .dashboard import router as dashboard_router
 from .engine import Engine
 from .storage import Storage
 from .config import load_config
+
+app = FastAPI(title="AI Trading Lab", version="2.0")
+
+app.include_router(dashboard_router)
 
 app = FastAPI(title="AI Trading Lab v2")
 cfg = load_config()
