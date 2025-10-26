@@ -1,6 +1,6 @@
 ccxt==4.3.78
 binance-futures-connector==4.1.0
-pandas==2.2.2
+pandas==2.2.3
 numpy==1.26.4
 fastapi==0.115.0
 uvicorn==0.30.6
