@@ -183,3 +183,61 @@ setInterval(loadSummary, 15000);
 </html>
     """
     return HTMLResponse(html)
+from fastapi import Header, HTTPException
+from random import random, choice
+from datetime import timedelta
+
+@router.post("/debug/seed")
+def debug_seed(n: int = 200, admin_token: str | None = Header(default=None)):
+    """
+    Basit test verisi üretir. Sadece ADMIN_TOKEN doğruysa çalışır.
+    """
+    import os
+    if admin_token != os.getenv("ADMIN_TOKEN"):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    from .storage import Storage
+    db = Storage("data/results.sqlite")
+
+    symbols = ["BTCUSDT","ETHUSDT","BNBUSDT","SOLUSDT","PAXGUSDT","XRPUSDT","ADAUSDT","DOGEUSDT"]
+    strategies = ["RSIEMA","MACDBB","RSIEMA_VAR1","MACDBB_VAR2"]
+    t = datetime.utcnow() - timedelta(days=7)
+
+    rows = []
+    for _ in range(n):
+        t += timedelta(minutes=30)
+        sym = choice(symbols)
+        strat = choice(strategies)
+        # +/- rasgele PnL
+        pnl = (random()-0.48) * (1 + random()*2)
+        rows.append({
+            "strategy_id": strat,
+            "symbol": sym,
+            "ts_open": t - timedelta(minutes=30),
+            "ts_close": t,
+            "pnl": round(pnl, 4),
+            "meta": {}
+        })
+
+    # Storage sınıfında insert_trades(list[dict]) varsa kullan,
+    # yoksa basit bir bulk insert:
+    from sqlalchemy import text
+    with db.engine.begin() as conn:
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS trades (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              strategy_id TEXT,
+              symbol TEXT,
+              ts_open TIMESTAMP,
+              ts_close TIMESTAMP,
+              pnl REAL,
+              meta TEXT
+            )
+        """))
+        for r in rows:
+            conn.execute(text("""
+              INSERT INTO trades (strategy_id, symbol, ts_open, ts_close, pnl, meta)
+              VALUES (:strategy_id, :symbol, :ts_open, :ts_close, :pnl, :meta)
+            """), {**r, "meta": "{}"})
+
+    return {"inserted": len(rows)}
